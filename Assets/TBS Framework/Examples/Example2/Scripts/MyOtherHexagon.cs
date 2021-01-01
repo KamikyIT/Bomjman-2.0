@@ -20,7 +20,7 @@ namespace TbsFramework.Example2
         static Color UnMarkColor = new Color(1, 1, 1, 0);
 
         SpriteRenderer _highlighterSpriteRenderer;
-        public SpriteRenderer HighlighterSpriteRenderer {
+        SpriteRenderer HighlighterSpriteRenderer {
             get {
                 if (_highlighterSpriteRenderer == null)
                 {
@@ -33,7 +33,7 @@ namespace TbsFramework.Example2
         }
 
         List<SpriteRenderer> _childSpriteRenderers;
-        public List<SpriteRenderer> ChildSpriteRenderers {
+        List<SpriteRenderer> ChildSpriteRenderers {
             get {
                 if (_childSpriteRenderers == null)
                 {
