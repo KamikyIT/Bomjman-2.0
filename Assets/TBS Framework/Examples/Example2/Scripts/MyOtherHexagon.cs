@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using TbsFramework.Cells;
 using UnityEngine;
 
@@ -5,48 +7,80 @@ namespace TbsFramework.Example2
 {
     public class MyOtherHexagon : Hexagon
     {
+        const string Highlighter = @"Highlighter";
+
         public GroundType GroundType;
         public bool IsSkyTaken;//Indicates if a flying unit is occupying the cell.
 
         private Vector3 dimensions = new Vector3(5.3f, 4.6f, 0f);
 
+        static Color ReachableColor = new Color(1, 0.92f, 0.016f, 1);
+        static Color PathColor = new Color(0, 1, 0, 1);
+        static Color HighlitedColor = new Color(0.5f, 0.5f, 0.5f, 0.25f);
+        static Color UnMarkColor = new Color(1, 1, 1, 0);
+
+        SpriteRenderer _highlighterSpriteRenderer;
+        public SpriteRenderer HighlighterSpriteRenderer {
+            get {
+                if (_highlighterSpriteRenderer == null)
+                {
+                    var go = transform.Find(Highlighter);
+                    if (go != null)
+                        _highlighterSpriteRenderer = go.GetComponent<SpriteRenderer>();
+                }
+                return _highlighterSpriteRenderer;
+            }
+        }
+
+        List<SpriteRenderer> _childSpriteRenderers;
+        public List<SpriteRenderer> ChildSpriteRenderers {
+            get {
+                if (_childSpriteRenderers == null)
+                {
+                    var go = transform.Find(Highlighter);
+                    _childSpriteRenderers = new List<SpriteRenderer>();
+                    foreach (Transform child in go.transform)
+                    {
+                        var sprite = child.GetComponent<SpriteRenderer>();
+                        if (sprite != null)
+                            _childSpriteRenderers.Add(sprite);
+                    }
+                }
+                return _childSpriteRenderers;
+            }
+        }
+
         public void Start()
         {
-            SetColor(new Color(1, 1, 1, 0));
+            SetColor(UnMarkColor);
         }
 
         public override void MarkAsReachable()
         {
-            SetColor(new Color(1, 0.92f, 0.016f, 1));
+            SetColor(ReachableColor);
         }
         public override void MarkAsPath()
         {
-            SetColor(new Color(0, 1, 0, 1));
+            SetColor(PathColor);
         }
         public override void MarkAsHighlighted()
         {
-            SetColor(new Color(0.5f, 0.5f, 0.5f, 0.25f));
+            SetColor(HighlitedColor);
         }
         public override void UnMark()
         {
-            SetColor(new Color(1, 1, 1, 0));
+            SetColor(UnMarkColor);
         }
 
         private void SetColor(Color color)
         {
-            var highlighter = transform.Find("Highlighter");
-            var spriteRenderer = highlighter.GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.color = color;
-            }
-            foreach (Transform child in highlighter.transform)
-            {
-                var childColor = new Color(color.r, color.g, color.b, 1);
-                spriteRenderer = child.GetComponent<SpriteRenderer>();
-                if (spriteRenderer == null) continue;
+            if (HighlighterSpriteRenderer != null)
+                HighlighterSpriteRenderer.color = color;
 
-                child.GetComponent<SpriteRenderer>().color = childColor;
+            if (ChildSpriteRenderers != null)
+            {
+                var visibleChildColor = new Color(color.r, color.g, color.b, 1);
+                ChildSpriteRenderers.ForEach(x => x.color = visibleChildColor);
             }
         }
 
