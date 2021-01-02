@@ -43,20 +43,20 @@ namespace TbsFramework.Example2
 
             OnUnitHighlighted(sender, e);
         }
-        private void OnGameStarted(object sender, EventArgs e)
+        private void OnGameStarted(CellGrid cellGrid)
         {
             InfoText.text = "Player " + (CellGrid.CurrentPlayerNumber + 1);
 
-            OnTurnEnded(sender, e);
+            OnTurnEnded(cellGrid);
         }
-        private void OnGameEnded(object sender, EventArgs e)
+        private void OnGameEnded(CellGrid cellGrid)
         {
-            InfoText.text = "Player " + ((sender as CellGrid).CurrentPlayerNumber + 1) + " wins!";
+            InfoText.text = "Player " + (cellGrid.CurrentPlayerNumber + 1) + " wins!";
         }
-        private void OnTurnEnded(object sender, EventArgs e)
+        private void OnTurnEnded(CellGrid cellGrid)
         {
-            NextTurnButton.interactable = ((sender as CellGrid).CurrentPlayer is HumanPlayer);
-            InfoText.text = "Player " + ((sender as CellGrid).CurrentPlayerNumber + 1);
+            NextTurnButton.interactable = (cellGrid.CurrentPlayer is HumanPlayer);
+            InfoText.text = "Player " + (cellGrid.CurrentPlayerNumber + 1);
         }
 
         private void OnUnitDehighlighted(object sender, EventArgs e)

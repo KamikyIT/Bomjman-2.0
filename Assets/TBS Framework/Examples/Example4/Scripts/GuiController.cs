@@ -43,7 +43,7 @@ namespace TbsFramework.Example4
             CellGrid.UnitAdded += OnUnitAdded;
         }
 
-        private void OnGameStarted(object sender, EventArgs e)
+        private void OnGameStarted(CellGrid cellGrid)
         {
             foreach (Transform cell in CellGrid.transform)
             {
@@ -51,29 +51,30 @@ namespace TbsFramework.Example4
                 cell.GetComponent<Cell>().CellDehighlighted += OnCellDehighlighted;
             }
 
-            OnTurnEnded(sender, e);
+            OnTurnEnded(cellGrid);
         }
 
-        private void OnGameEnded(object sender, EventArgs e)
+        private void OnGameEnded(CellGrid cellGrid)
         {
-            GameOverText.text = string.Format("Player {0} wins", (sender as CellGrid).CurrentPlayerNumber + 1);
+            GameOverText.text = string.Format("Player {0} wins", cellGrid.CurrentPlayerNumber + 1);
             GameOverPanel.SetActive(true);
         }
-        private void OnTurnEnded(object sender, EventArgs e)
+        private void OnTurnEnded(CellGrid cellGrid)
         {
-            NextTurnButton.interactable = ((sender as CellGrid).CurrentPlayer is HumanPlayer);
+            NextTurnButton.interactable = (cellGrid.CurrentPlayer is HumanPlayer);
         }
-        private void OnCellDehighlighted(object sender, EventArgs e)
+        private void OnCellDehighlighted(Cell cell)
         {
             TerrainPanel.SetActive(false);
         }
 
-        private void OnCellHighlighted(object sender, EventArgs e)
+        private void OnCellHighlighted(Cell cell)
         {
-            var cell = sender as AdvWrsSquare;
-            TerrainNameText.text = cell.TileType;
+            // Мудила. Я это удалю.
+            var advWrsSquare = cell as AdvWrsSquare;
+            TerrainNameText.text = advWrsSquare.TileType;
             MovementCostText.text = string.Format("Mov cost: {0}", cell.MovementCost);
-            DefenceBoostText.text = string.Format("Def boost: {0}", cell.DefenceBoost);
+            DefenceBoostText.text = string.Format("Def boost: {0}", advWrsSquare.DefenceBoost);
 
             TerrainPanel.SetActive(true);
         }
@@ -121,7 +122,7 @@ namespace TbsFramework.Example4
                 RangedAttackText.text = "";
             }
 
-            OnCellHighlighted(unit.Cell, null);
+            OnCellHighlighted(unit.Cell);
         }
 
         private void OnUnitAdded(object sender, UnitCreatedEventArgs e)

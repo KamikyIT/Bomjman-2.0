@@ -28,7 +28,7 @@ namespace TbsFramework.Example1
             CellGrid.UnitAdded += OnUnitAdded;
         }
 
-        private void OnGameStarted(object sender, EventArgs e)
+        private void OnGameStarted(CellGrid cellGrid)
         {
             foreach (Transform cell in CellGrid.transform)
             {
@@ -36,28 +36,28 @@ namespace TbsFramework.Example1
                 cell.GetComponent<Cell>().CellDehighlighted += OnCellDehighlighted;
             }
 
-            OnTurnEnded(sender, e);
+            OnTurnEnded(cellGrid);
         }
 
-        private void OnGameEnded(object sender, EventArgs e)
+        private void OnGameEnded(CellGrid cellGrid)
         {
-            InfoText.text = "Player " + ((sender as CellGrid).CurrentPlayerNumber + 1) + " wins!";
+            InfoText.text = "Player " + (cellGrid.CurrentPlayerNumber + 1) + " wins!";
         }
-        private void OnTurnEnded(object sender, EventArgs e)
+        private void OnTurnEnded(CellGrid cellGrid)
         {
-            NextTurnButton.interactable = ((sender as CellGrid).CurrentPlayer is HumanPlayer);
+            NextTurnButton.interactable = cellGrid.CurrentPlayer is HumanPlayer;
 
-            InfoText.text = "Player " + ((sender as CellGrid).CurrentPlayerNumber + 1);
+            InfoText.text = "Player " + cellGrid.CurrentPlayerNumber + 1;
         }
-        private void OnCellDehighlighted(object sender, EventArgs e)
+        private void OnCellDehighlighted(Cell cell)
         {
             UnitImage.color = Color.gray;
             StatsText.text = "";
         }
-        private void OnCellHighlighted(object sender, EventArgs e)
+        private void OnCellHighlighted(Cell cell)
         {
             UnitImage.color = Color.gray;
-            StatsText.text = "Movement Cost: " + (sender as Cell).MovementCost;
+            StatsText.text = "Movement Cost: " + cell.MovementCost;
         }
         private void OnUnitAttacked(object sender, AttackEventArgs e)
         {

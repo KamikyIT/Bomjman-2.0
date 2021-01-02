@@ -34,29 +34,29 @@ namespace TbsFramework.Cells
         /// CellClicked event is invoked when user clicks on the cell. 
         /// It requires a collider on the cell game object to work.
         /// </summary>
-        public event EventHandler CellClicked;
+        public event Action<Cell> CellClicked;
         /// <summary>
         /// CellHighlighed event is invoked when cursor enters the cell's collider. 
         /// It requires a collider on the cell game object to work.
         /// </summary>
-        public event EventHandler CellHighlighted;
+        public event Action<Cell> CellHighlighted;
         /// <summary>
         /// CellDehighlighted event is invoked when cursor exits the cell's collider. 
         /// It requires a collider on the cell game object to work.
         /// </summary>
-        public event EventHandler CellDehighlighted;
+        public event Action<Cell> CellDehighlighted;
 
         protected virtual void OnMouseEnter()
         {
-            CellHighlighted?.Invoke(this, new EventArgs());
+            CellHighlighted?.Invoke(this);
         }
         protected virtual void OnMouseExit()
         {
-            CellDehighlighted?.Invoke(this, new EventArgs());
+            CellDehighlighted?.Invoke(this);
         }
         void OnMouseDown()
         {
-            CellClicked?.Invoke(this, new EventArgs());
+            CellClicked?.Invoke(this);
         }
 
         /// <summary>

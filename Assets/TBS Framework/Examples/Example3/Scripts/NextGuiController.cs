@@ -18,10 +18,10 @@ namespace TbsFramework.Example3
         public GameObject GameOverPanel;
         public Canvas Canvas;
 
-        private GameObject _infoPanel;
-        private GameObject _gameOverPanel;
+        GameObject _infoPanel;
+        GameObject _gameOverPanel;
 
-        private bool isGameOver;
+        bool isGameOver;
 
         void Awake()
         {
@@ -31,15 +31,16 @@ namespace TbsFramework.Example3
         }
 
 
-        private void OnTurnEnded(object sender, EventArgs e)
+        void OnTurnEnded(CellGrid cellGrid)
         {
-            NextTurnButton.interactable = ((sender as CellGrid).CurrentPlayer is HumanPlayer);
+            NextTurnButton.interactable = cellGrid.CurrentPlayer is HumanPlayer;
         }
-        private void OnGameEnded(object sender, EventArgs e)
+
+        void OnGameEnded(CellGrid cellGrid)
         {
             isGameOver = true;
             _gameOverPanel = Instantiate(GameOverPanel);
-            _gameOverPanel.transform.Find("InfoText").GetComponent<Text>().text = "Player " + ((sender as CellGrid).CurrentPlayerNumber + 1) + "\nwins!";
+            _gameOverPanel.transform.Find("InfoText").GetComponent<Text>().text = "Player " + (cellGrid.CurrentPlayerNumber + 1) + "\nwins!";
 
             _gameOverPanel.transform.Find("DismissButton").GetComponent<Button>().onClick.AddListener(DismissPanel);
 

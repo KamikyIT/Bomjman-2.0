@@ -603,8 +603,6 @@ namespace TbsFramework.EditorUtils
             ICellGridGenerator generator = (ICellGridGenerator)Activator.CreateInstance(selectedGenerator);
             generator.CellsParent = cellGrid.transform;
 
-            cellGrid.GetComponent<CellGrid>().PlayersParent = players.transform;
-
             var unitGenerator = cellGrid.AddComponent<CustomUnitGenerator>();
             unitGenerator.UnitsParent = units.transform;
             unitGenerator.CellsParent = cellGrid.transform;

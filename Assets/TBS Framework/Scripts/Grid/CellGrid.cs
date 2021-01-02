@@ -19,30 +19,30 @@ namespace TbsFramework.Grid
         /// <summary>
         /// LevelLoading event is invoked before Initialize method is run.
         /// </summary>
-        public event EventHandler LevelLoading;
+        public event Action<CellGrid> LevelLoading;
         /// <summary>
         /// LevelLoadingDone event is invoked after Initialize method has finished running.
         /// </summary>
-        public event EventHandler LevelLoadingDone;
+        public event Action<CellGrid> LevelLoadingDone;
         /// <summary>
         /// GameStarted event is invoked at the beggining of StartGame method.
         /// </summary>
-        public event EventHandler GameStarted;
+        public event Action<CellGrid> GameStarted;
         /// <summary>
         /// GameEnded event is invoked when there is a single player left in the game.
         /// </summary>
-        public event EventHandler GameEnded;
+        public event Action<CellGrid> GameEnded;
         /// <summary>
         /// Turn ended event is invoked at the end of each turn.
         /// </summary>
-        public event EventHandler TurnEnded;
+        public event Action<CellGrid> TurnEnded;
 
         /// <summary>
         /// UnitAdded event is invoked each time AddUnit method is called.
         /// </summary>
         public event EventHandler<UnitCreatedEventArgs> UnitAdded;
 
-        private CellGridState _cellGridState; //The grid delegates some of its behaviours to cellGridState object.
+        CellGridState _cellGridState; //The grid delegates some of its behaviours to cellGridState object.
         public CellGridState CellGridState
         {
             get
@@ -58,7 +58,7 @@ namespace TbsFramework.Grid
             }
         }
 
-        public int NumberOfPlayers { get; private set; }
+        int NumberOfPlayers { get; set; }
 
         public Player CurrentPlayer
         {
@@ -66,36 +66,52 @@ namespace TbsFramework.Grid
         }
         public int CurrentPlayerNumber { get; private set; }
 
+
+        Transform _playersParent;
         /// <summary>
         /// GameObject that holds player objects.
         /// </summary>
-        public Transform PlayersParent;
+        Transform PlayersParent {
+            get {
+                if (_playersParent == null)
+                {
+                    var playersParentGo = GameObject.FindGameObjectWithTag(Helpers.TagsManager.PlayersParent);
+                    if (playersParentGo == null)
+                        Debug.LogError("_playersParentGo == null. Mark PlayersParent GameObject with 'PlayersParent' Tag.");
 
-        public List<Player> Players { get; private set; }
+                    _playersParent = playersParentGo.transform;
+                }
+                return _playersParent;
+            }
+        }
+
+        List<Player> Players { get; set; }
         public List<Cell> Cells { get; private set; }
         public List<Unit> Units { get; private set; }
 
         private void Start()
         {
-            if (LevelLoading != null)
-                LevelLoading.Invoke(this, new EventArgs());
+            LevelLoading?.Invoke(this);
 
             Initialize();
 
-            if (LevelLoadingDone != null)
-                LevelLoadingDone.Invoke(this, new EventArgs());
+            LevelLoadingDone?.Invoke(this);
 
             StartGame();
         }
 
-        private void Initialize()
+        void Initialize()
         {
             Players = new List<Player>();
             for (int i = 0; i < PlayersParent.childCount; i++)
             {
                 var player = PlayersParent.GetChild(i).GetComponent<Player>();
                 if (player != null)
+                {
+                    if (Players.Any(x => x.PlayerNumber == player.PlayerNumber))
+                        Debug.LogError($"Same PlayerNumber '{player.PlayerNumber}' in Players.");
                     Players.Add(player);
+                }
                 else
                     Debug.LogError("Invalid object in Players Parent game object");
             }
@@ -109,7 +125,7 @@ namespace TbsFramework.Grid
                 if (cell != null)
                     Cells.Add(cell);
                 else
-                    Debug.LogError("Invalid object in cells paretn game object");
+                    Debug.LogError("Invalid object in cells parent game object");
             }
 
             foreach (var cell in Cells)
@@ -117,7 +133,7 @@ namespace TbsFramework.Grid
                 cell.CellClicked += OnCellClicked;
                 cell.CellHighlighted += OnCellHighlighted;
                 cell.CellDehighlighted += OnCellDehighlighted;
-                cell.GetComponent<Cell>().GetNeighbours(Cells);
+                cell.GetNeighbours(Cells);
             }
 
             Units = new List<Unit>();
@@ -127,24 +143,28 @@ namespace TbsFramework.Grid
                 var units = unitGenerator.SpawnUnits(Cells);
                 foreach (var unit in units)
                 {
-                    AddUnit(unit.GetComponent<Transform>());
+                    Units.Add(unit);
+                    unit.UnitClicked += OnUnitClicked;
+                    unit.UnitDestroyed += OnUnitDestroyed;
+
+                    UnitAdded?.Invoke(this, new UnitCreatedEventArgs(unit.transform));
                 }
             }
             else
                 Debug.LogError("No IUnitGenerator script attached to cell grid");
         }
 
-        private void OnCellDehighlighted(object sender, EventArgs e)
+        private void OnCellDehighlighted(Cell cell)
         {
-            CellGridState.OnCellDeselected(sender as Cell);
+            CellGridState.OnCellDeselected(cell);
         }
-        private void OnCellHighlighted(object sender, EventArgs e)
+        private void OnCellHighlighted(Cell cell)
         {
-            CellGridState.OnCellSelected(sender as Cell);
+            CellGridState.OnCellSelected(cell);
         }
-        private void OnCellClicked(object sender, EventArgs e)
+        private void OnCellClicked(Cell cell)
         {
-            CellGridState.OnCellClicked(sender as Cell);
+            CellGridState.OnCellClicked(cell);
         }
 
         private void OnUnitClicked(object sender, EventArgs e)
@@ -154,26 +174,9 @@ namespace TbsFramework.Grid
         private void OnUnitDestroyed(object sender, AttackEventArgs e)
         {
             Units.Remove(sender as Unit);
-            var totalPlayersAlive = Units.Select(u => u.PlayerNumber).Distinct().ToList(); //Checking if the game is over
-            if (totalPlayersAlive.Count == 1)
-            {
-                if (GameEnded != null)
-                    GameEnded.Invoke(this, new EventArgs());
-            }
-        }
-
-        /// <summary>
-        /// Adds unit to the game
-        /// </summary>
-        /// <param name="unit">Unit to add</param>
-        public void AddUnit(Transform unit)
-        {
-            Units.Add(unit.GetComponent<Unit>());
-            unit.GetComponent<Unit>().UnitClicked += OnUnitClicked;
-            unit.GetComponent<Unit>().UnitDestroyed += OnUnitDestroyed;
-
-            if (UnitAdded != null)
-                UnitAdded.Invoke(this, new UnitCreatedEventArgs(unit));
+            var totalPlayersAlive = Units.Select(u => u.PlayerNumber).Distinct().Count(); //Checking if the game is over
+            if (totalPlayersAlive == 1)
+                GameEnded?.Invoke(this);
         }
 
         /// <summary>
@@ -181,13 +184,13 @@ namespace TbsFramework.Grid
         /// </summary>
         public void StartGame()
         {
-            if (GameStarted != null)
-                GameStarted.Invoke(this, new EventArgs());
+            GameStarted?.Invoke(this);
 
-            Units.FindAll(u => u.PlayerNumber.Equals(CurrentPlayerNumber)).ForEach(u => { u.OnTurnStart(); });
+            Units.FindAll(u => u.PlayerNumber.Equals(CurrentPlayerNumber)).ForEach(u => u.OnTurnStart());
             Players.Find(p => p.PlayerNumber.Equals(CurrentPlayerNumber)).Play(this);
             Debug.Log("Game started");
         }
+
         /// <summary>
         /// Method makes turn transitions. It is called by player at the end of his turn.
         /// </summary>
@@ -207,8 +210,7 @@ namespace TbsFramework.Grid
                 CurrentPlayerNumber = (CurrentPlayerNumber + 1) % NumberOfPlayers;
             }//Skipping players that are defeated.
 
-            if (TurnEnded != null)
-                TurnEnded.Invoke(this, new EventArgs());
+            TurnEnded?.Invoke(this);
 
             Debug.Log(string.Format("Player {0} turn", CurrentPlayerNumber));
             Units.FindAll(u => u.PlayerNumber.Equals(CurrentPlayerNumber)).ForEach(u => { u.OnTurnStart(); });

@@ -11,16 +11,16 @@ namespace TbsFramework.Gui
 
         void Awake()
         {
-            CellGrid.LevelLoading += onLevelLoading;
-            CellGrid.LevelLoadingDone += onLevelLoadingDone;
+            CellGrid.LevelLoading += OnLevelLoading;
+            CellGrid.LevelLoadingDone += OnLevelLoadingDone;
         }
 
-        private void onLevelLoading(object sender, EventArgs e)
+        void OnLevelLoading(CellGrid cellGrid)
         {
             Debug.Log("Level is loading");
         }
 
-        private void onLevelLoadingDone(object sender, EventArgs e)
+        void OnLevelLoadingDone(CellGrid cellGrid)
         {
             Debug.Log("Level loading done");
             Debug.Log("Press 'n' to end turn");
