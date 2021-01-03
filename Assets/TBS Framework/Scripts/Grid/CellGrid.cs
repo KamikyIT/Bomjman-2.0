@@ -167,13 +167,13 @@ namespace TbsFramework.Grid
             CellGridState.OnCellClicked(cell);
         }
 
-        private void OnUnitClicked(object sender, EventArgs e)
+        private void OnUnitClicked(Unit unit)
         {
-            CellGridState.OnUnitClicked(sender as Unit);
+            CellGridState.OnUnitClicked(unit);
         }
-        private void OnUnitDestroyed(object sender, AttackEventArgs e)
+        private void OnUnitDestroyed(Unit unit, AttackEventArgs e)
         {
-            Units.Remove(sender as Unit);
+            Units.Remove(unit);
             var totalPlayersAlive = Units.Select(u => u.PlayerNumber).Distinct().Count(); //Checking if the game is over
             if (totalPlayersAlive == 1)
                 GameEnded?.Invoke(this);

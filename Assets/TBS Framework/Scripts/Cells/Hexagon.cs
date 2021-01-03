@@ -80,7 +80,11 @@ namespace TbsFramework.Cells
         public override int GetDistance(Cell other)
         {
             var _other = other as Hexagon;
-            int distance = (int)(Mathf.Abs(CubeCoord.x - _other.CubeCoord.x) + Mathf.Abs(CubeCoord.y - _other.CubeCoord.y) + Mathf.Abs(CubeCoord.z - _other.CubeCoord.z)) / 2;
+            int distance = (int)(
+                Mathf.Abs(CubeCoord.x - _other.CubeCoord.x) + 
+                Mathf.Abs(CubeCoord.y - _other.CubeCoord.y) + 
+                Mathf.Abs(CubeCoord.z - _other.CubeCoord.z)
+                ) / 2;
             return distance;
         }//Distance is given using Manhattan Norm.
 

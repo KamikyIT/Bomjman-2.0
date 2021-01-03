@@ -33,15 +33,15 @@ namespace TbsFramework.Example2
             CellGrid.UnitAdded += OnUnitAdded;
         }
 
-        private void OnUnitAttacked(object sender, AttackEventArgs e)
+        private void OnUnitAttacked(Unit unit, AttackEventArgs e)
         {
             if (!(CellGrid.CurrentPlayer is HumanPlayer)) return;
 
-            OnUnitDehighlighted(sender, e);
+            OnUnitDehighlighted(unit);
 
-            if ((sender as Unit).HitPoints <= 0) return;
+            if (unit.HitPoints <= 0) return;
 
-            OnUnitHighlighted(sender, e);
+            OnUnitHighlighted(unit);
         }
         private void OnGameStarted(CellGrid cellGrid)
         {
@@ -59,7 +59,7 @@ namespace TbsFramework.Example2
             InfoText.text = "Player " + (cellGrid.CurrentPlayerNumber + 1);
         }
 
-        private void OnUnitDehighlighted(object sender, EventArgs e)
+        private void OnUnitDehighlighted(Unit unit)
         {
             foreach (Transform marker in AttackText.transform)
             {
@@ -81,13 +81,13 @@ namespace TbsFramework.Example2
                 Destroy(hpBar.gameObject);
             }
         }
-        private void OnUnitHighlighted(object sender, EventArgs e)
+        private void OnUnitHighlighted(Unit unit)
         {
-            var attack = (sender as Unit).AttackFactor;
-            var defence = (sender as Unit).DefenceFactor;
-            var range = (sender as Unit).AttackRange;
+            var attack = unit.AttackFactor;
+            var defence = unit.DefenceFactor;
+            var range = unit.AttackRange;
 
-            float hpScale = (float)((float)(sender as Unit).HitPoints / (float)(sender as Unit).TotalHitPoints);
+            float hpScale = (float)((float)unit.HitPoints / (float)unit.TotalHitPoints);
 
             Image fullHpBar = Instantiate(FullHPBar);
             Image emptyHpBar = Instantiate(EmptyHPBar);

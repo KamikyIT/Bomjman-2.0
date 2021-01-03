@@ -20,39 +20,39 @@ namespace TbsFramework.Units
         /// UnitClicked event is invoked when user clicks the unit. 
         /// It requires a collider on the unit game object to work.
         /// </summary>
-        public event EventHandler UnitClicked;
+        public event Action<Unit> UnitClicked;
         /// <summary>
         /// UnitSelected event is invoked when user clicks on unit that belongs to him. 
         /// It requires a collider on the unit game object to work.
         /// </summary>
-        public event EventHandler UnitSelected;
+        public event Action<Unit> UnitSelected;
         /// <summary>
         /// UnitDeselected event is invoked when user click outside of currently selected unit's collider.
         /// It requires a collider on the unit game object to work.
         /// </summary>
-        public event EventHandler UnitDeselected;
+        public event Action<Unit> UnitDeselected;
         /// <summary>
         /// UnitHighlighted event is invoked when user moves cursor over the unit. 
         /// It requires a collider on the unit game object to work.
         /// </summary>
-        public event EventHandler UnitHighlighted;
+        public event Action<Unit> UnitHighlighted;
         /// <summary>
         /// UnitDehighlighted event is invoked when cursor exits unit's collider. 
         /// It requires a collider on the unit game object to work.
         /// </summary>
-        public event EventHandler UnitDehighlighted;
+        public event Action<Unit> UnitDehighlighted;
         /// <summary>
         /// UnitAttacked event is invoked when the unit is attacked.
         /// </summary>
-        public event EventHandler<AttackEventArgs> UnitAttacked;
+        public event Action<Unit, AttackEventArgs> UnitAttacked;
         /// <summary>
         /// UnitDestroyed event is invoked when unit's hitpoints drop below 0.
         /// </summary>
-        public event EventHandler<AttackEventArgs> UnitDestroyed;
+        public event Action<Unit, AttackEventArgs> UnitDestroyed;
         /// <summary>
         /// UnitMoved event is invoked when unit moves from one cell to another.
         /// </summary>
-        public event EventHandler<MovementEventArgs> UnitMoved;
+        public event Action<Unit, MovementEventArgs> UnitMoved;
 
         public UnitState UnitState { get; set; }
         public void SetState(UnitState state)
@@ -72,20 +72,7 @@ namespace TbsFramework.Units
         /// <summary>
         /// Cell that the unit is currently occupying.
         /// </summary>
-        [SerializeField]
-        [HideInInspector]
-        private Cell cell;
-        public Cell Cell
-        {
-            get
-            {
-                return cell;
-            }
-            set
-            {
-                cell = value;
-            }
-        }
+        public Cell Cell { get; set; }
 
         public int HitPoints;
         public int AttackRange;
@@ -158,24 +145,15 @@ namespace TbsFramework.Units
 
         protected virtual void OnMouseDown()
         {
-            if (UnitClicked != null)
-            {
-                UnitClicked.Invoke(this, new EventArgs());
-            }
+            UnitClicked?.Invoke(this);
         }
         protected virtual void OnMouseEnter()
         {
-            if (UnitHighlighted != null)
-            {
-                UnitHighlighted.Invoke(this, new EventArgs());
-            }
+            UnitHighlighted?.Invoke(this);
         }
         protected virtual void OnMouseExit()
         {
-            if (UnitDehighlighted != null)
-            {
-                UnitDehighlighted.Invoke(this, new EventArgs());
-            }
+            UnitDehighlighted?.Invoke(this);
         }
 
         /// <summary>
@@ -216,10 +194,7 @@ namespace TbsFramework.Units
         public virtual void OnUnitSelected()
         {
             SetState(new UnitStateMarkedAsSelected(this));
-            if (UnitSelected != null)
-            {
-                UnitSelected.Invoke(this, new EventArgs());
-            }
+            UnitSelected?.Invoke(this);
         }
         /// <summary>
         /// Method is called when unit is deselected.
@@ -227,10 +202,7 @@ namespace TbsFramework.Units
         public virtual void OnUnitDeselected()
         {
             SetState(new UnitStateMarkedAsFriendly(this));
-            if (UnitDeselected != null)
-            {
-                UnitDeselected.Invoke(this, new EventArgs());
-            }
+            UnitDeselected?.Invoke(this);
         }
 
         /// <summary>
@@ -252,9 +224,7 @@ namespace TbsFramework.Units
         public void AttackHandler(Unit unitToAttack)
         {
             if (!IsUnitAttackable(unitToAttack, Cell))
-            {
                 return;
-            }
 
             AttackAction attackAction = DealDamage(unitToAttack);
             MarkAsAttacking(unitToAttack);
@@ -295,16 +265,10 @@ namespace TbsFramework.Units
             HitPoints -= damageTaken;
             DefenceActionPerformed();
 
-            if (UnitAttacked != null)
-            {
-                UnitAttacked.Invoke(this, new AttackEventArgs(aggressor, this, damage));
-            }
+            UnitAttacked?.Invoke(this, new AttackEventArgs(aggressor, this, damage));
             if (HitPoints <= 0)
             {
-                if (UnitDestroyed != null)
-                {
-                    UnitDestroyed.Invoke(this, new AttackEventArgs(aggressor, this, damage));
-                }
+                UnitDestroyed?.Invoke(this, new AttackEventArgs(aggressor, this, damage));
                 OnDestroyed();
             }
         }
